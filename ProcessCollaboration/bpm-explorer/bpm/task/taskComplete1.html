@@ -1,0 +1,52 @@
+<html ng-app="bpm">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>任务查看</title>
+	<link href="../../build/common/base.css" rel="stylesheet">
+	<script type="text/javascript" src="../../build/common/base.js"></script>
+	<script type="text/javascript" src="../../build/common/ngEdit.js"></script>
+	<script type="text/javascript" src="../../assets/js/common/bpmForm/bpmService1.js"></script>
+	<script type="text/javascript" src="../../build/common/custForm.js"></script>
+	<style media="print">.print-hidden{display:none}</style>
+
+
+	<script type="text/javascript">
+		var TaskComplateController = ['$scope','baseService',function($scope,baseService){
+			$scope.bpmInitParam = {"taskId":$.getParam("taskId")};
+		}];
+
+	</script>
+</head>
+
+	<body ng-controller="TaskComplateController">
+		<div class="ibox-title print-hidden">
+			<div bpm-buttons></div>
+		</div>
+		<div bpm-init="bpmInitParam"></div>
+		<div class="ivu-form ivu-form-label-right">//获取并显示初始化表单数据
+		<table class="form-table">
+			<tbody>
+		    <tr class="firstRow">
+			<th>可接受价格</th>
+			<td><input type="text" class="form-control" ng-model="data.bjbc.price" ab-basic-permission="permission.bjbc.bjjg.price" desc="备件价格-可接受价格" ab-validate="{&quot;maxlength&quot;:50}"></td>
+			</tr>
+			<tr><th>ship_id</th>
+			<td><input type="text" class=" form-control" ng-model="data.bjbc.ship_id" ab-bas="船舶备件补充-审核数" ab-validate="{&quot;maxlength&quot;:50}"> </td>\n\t\t\t\t
+			<td><input type="text" class=" form-control" ng-model="initData.bjbc.cbbjbc.dw" ab-basic-permission="permission.bjbc.cbbjbc.bz" desc="船舶备件补充-备注" ab-validate="{&quot;maxlength&quot;:50}"> </td>
+
+			</tr>
+		    </tbody>
+		</table>
+		</div>
+		</div>
+		<div ng-moddel="data.bjbc.price">
+
+		</div>
+		<div>
+			jogahogj
+		</div>
+		</div>
+
+		<div>@请发“邮件”联系执行人申请协作</div>
+	</body>
+</html>

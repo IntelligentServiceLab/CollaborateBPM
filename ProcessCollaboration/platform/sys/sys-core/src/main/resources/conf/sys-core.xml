@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+    <!--  <import resource="sys-jms.xml"/>   -->
+    <import resource="base-db.xml"/>
+
+    <!-- 缓存配置实现 -->
+    <!-- com.dstz.sys.redis.RedisCache  可切换为redis 的实现-->
+<!--    <bean id="iCache" class="com.dstz.base.core.cache.impl.MemoryCache"/>-->
+
+	<!-- jwtService -->
+	<bean id="jWTService" class="com.dstz.base.core.jwt.JWTService"/>
+
+    <bean id="lettuceConnectionFactory" class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory">
+        <constructor-arg index="0">
+            <bean class="org.springframework.data.redis.connection.RedisStandaloneConfiguration">
+                <property name="hostName" value="${redis.host}"/>
+                <property name="port" value="${redis.port}"/>
+                <property name="password" value="#{T(org.springframework.data.redis.connection.RedisPassword).of('${redis.pass}')}"/>
+                <property name="database" value="${redis.database.bpm}"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="stringRedisSerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+    <bean id="fstRedisSerializer" class="com.dstz.base.core.spring.FstRedisSerializer" />
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="lettuceConnectionFactory"/>
+        <property name="keySerializer" ref="stringRedisSerializer"/>
+        <property name="valueSerializer" ref="fstRedisSerializer" />
+    </bean>
+
+    <bean id="redisMessageListenerContainer" class="org.springframework.data.redis.listener.RedisMessageListenerContainer">
+        <property name="connectionFactory" ref="lettuceConnectionFactory" />
+    </bean>
+
+    <import resource="sys-mq-redis.xml"/>
+
+    <!-- 异步线程池 -->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <!-- 核心线程数  -->
+        <property name="corePoolSize" value="5"/>
+        <!-- 最大线程数 -->
+        <property name="maxPoolSize" value="10"/>
+        <!-- 队列最大长度 >=mainExecutor.maxSize -->
+        <property name="queueCapacity" value="1000"/>
+        <!-- 线程池维护线程所允许的空闲时间 -->
+        <property name="keepAliveSeconds" value="300"/>
+        <!-- 线程池对拒绝任务(无线程可用)的处理策略 -->
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
+        </property>
+    </bean>
+
+</beans>

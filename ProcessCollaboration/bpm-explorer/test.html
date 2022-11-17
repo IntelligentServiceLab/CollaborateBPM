@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="./build/common/jquery.js"></script>
+    <link href="../../build/common/base.css" rel="stylesheet">
+    <script type="text/javascript" src="../../build/common/base.js"></script>
+    <script type="text/javascript" src="../../build/common/ngEdit.js"></script>
+    <script type="text/javascript" src="../../assets/js/common/bpmForm/bpmService.js"></script>
+    <script type="text/javascript" src="../../build/common/custForm.js"></script>
+</head>
+<body ng-controller="TaskComplateController">
+<div style="text-align: center">
+
+        姓名：<input type="text" name="name" id="name"><br>
+        姓名：<input type="text" name="sex" id="sex"><br>
+    <button>发送一个 HTTP GET 请求并获取返回结果</button>
+    <!--用于测试taskComplete-->
+    <div className="ibox-title print-hidden">
+        <div bpm-buttons></div>
+    </div>
+    <div bpm-init="bpmInitParam"></div>
+
+</div>
+</body>
+
+
+<script type="text/javascript">
+    /*用于测试taskComplete*/
+    var TaskComplateController = ['$scope', 'baseService', function ($scope, baseService) {
+        $scope.bpmInitParam = {"taskId": 436504304694067201};
+    }];
+/*通过ajax调用后端接口返回信息，误删*/
+    $(document).ready(function(){
+        $("button").click(function(){
+            $.get("/agile-bpm-platform/test/shipd",function(data,status){
+                var datas=data.toString().slice(1,-1);
+               /* var jsondata=JSON.parse(datas);*/
+                alert("数据: "+datas);
+
+            });
+        });
+    });
+
+</script>
+</html>

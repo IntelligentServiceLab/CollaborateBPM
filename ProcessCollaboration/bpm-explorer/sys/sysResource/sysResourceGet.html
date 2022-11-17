@@ -1,0 +1,54 @@
+<html ng-app="app">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="../../build/common/base.css" rel="stylesheet">
+	<script type="text/javascript" src="../../build/common/base.js"></script>
+	<script type="text/javascript" src="../../build/common/ngEdit.js"></script>
+
+<script type="text/javascript">
+	var app = angular.module('app', [ 'baseDirective' ]);
+	app.controller("ctrl", [ '$scope', 'baseService', function($scope, baseService) {
+
+	} ]);
+</script>
+</head>
+<body ng-controller="ctrl" class="panel panel-default" ab-load="/org/sysResource/getJson?id={id}" ng-model="data">
+	<div class="panel-heading">
+		<h3 class="panel-title">详细信息</h3>
+	</div>
+	<table class="form-table">
+		<tr>
+			<th>资源别名:</th>
+			<td>{{data.alias }}</td>
+		</tr>
+		<tr>
+			<th>资源名:</th>
+			<td>{{data.name }}</td>
+		</tr>
+		<tr>
+			<th>默认地址:</th>
+			<td>{{data.url }}</td>
+		</tr>
+		<tr>
+			<th>启用:</th>
+			<td>{{data.enable == null? "" : data.enable == 1? "是" : "否"}}</td>
+		</tr>
+		<tr>
+			<th>默认展开:</th>
+			<td>{{data.opened == null? "" : data.opened == 1? "有" : "无" }}</td>
+		</tr>
+		<tr>
+			<th>字体图标:</th>
+			<td><span class="btn fa fa-{{data.icon}}"></span></td>
+		</tr>
+		<tr>
+			<th>类型:</th>
+			<td>{{data.type}}</td>
+		</tr>
+		<tr>
+			<th>排序:</th>
+			<td>{{data.sn }}</td>
+		</tr>
+	</table>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<html ng-app="bpm">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>启动流程</title>
+	<link href="../../build/common/base.css" rel="stylesheet">
+	<script type="text/javascript" src="../../build/common/base.js"></script>
+	<script type="text/javascript" src="../../build/common/ngEdit.js"></script>
+	<script type="text/javascript" src="../../assets/js/common/bpmForm/bpmService.js"></script>
+	<script type="text/javascript" src="../../build/common/custForm.js"></script>
+	<script src="https://cdn.staticfile.org/angular.js/1.4.6/angular.min.js"></script>
+	<style media="print">.print-hidden{display:none}</style>
+	<script type="text/javascript">
+		var StartController = ['$scope','baseService',function($scope,baseService){
+			$scope.bpmInitParam = {"defId":$.getParam("defId"),"defKey":$.getParam("defKey"),instanceId:$.getParam("instanceId")};
+		}];
+	</script>
+	<script type="text/javascript">
+		var app=angular.module('myApp',[]);
+		app.controller('myCtrl',function ($scope,$http) {
+			$scope.send=function (){
+				var data={policy:$scope.policy};
+				$http({
+					method:'POST',
+					url: 'agile-bpm-platform/test/test',
+					params:{
+						policy: $scope.policy
+					}
+				}).success(function (data,status,headers){
+					$scope.result=data;
+					$scope.tt=function () {
+						if (data) {alert("已经获取到合作伙伴信息")}
+
+					}
+				})
+			}
+
+		})
+	</script>
+</head>
+
+<body class="panel panel-default">
+<div  ng-controller="StartController">
+	<div  class="panel-heading print-hidden">
+		<div bpm-buttons></div>
+	</div>
+
+	<div bpm-init ></div>
+</div>
+
+
+
+<a href="http://localhost:8080/TestHttp.html">
+	<button id="sendMsg" ng-click="send()">请点击按钮筛选合作商</button>
+</a>
+
+
+
+</div>
+
+
+</body>
+</html>

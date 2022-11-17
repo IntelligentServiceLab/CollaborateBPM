@@ -1,0 +1,36 @@
+<html ng-app="bpm">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>任务处理</title>
+    <link href="../../build/common/base.css" rel="stylesheet">
+    <script type="text/javascript" src="../../build/common/base.js"></script>
+    <script type="text/javascript" src="../../build/common/ngEdit.js"></script>
+    <script type="text/javascript" src="../../assets/js/common/bpmForm/bpmService.js"></script>
+    <script type="text/javascript" src="../../build/common/custForm.js"></script>
+    <style media="print">.print-hidden {
+        display: none
+    }</style>
+
+
+    <script type="text/javascript">
+        var TaskComplateController = ['$scope', 'baseService', function ($scope, baseService) {
+            $scope.bpmInitParam = {"taskId": $.getParam("taskId")};
+        }];
+    </script>
+</head>
+
+<body ng-controller="TaskComplateController">
+<div className="ibox-title print-hidden">
+    <div bpm-buttons></div>
+</div>
+<div bpm-init="bpmInitParam"></div>
+
+<a href="http://localhost:8080/TestHttp.html">
+    <button id="sendMsg" ng-click="send()">请点击按钮筛选合作商</button>
+</a>
+<a href="http://localhost:8080/TestHttp1.html">
+    <button id="startMsg" ng-click="send()">请点击按钮启动合作商流程</button>
+</a>
+<div>@请发“邮件”联系执行人申请协作</div>
+</body>
+</html>

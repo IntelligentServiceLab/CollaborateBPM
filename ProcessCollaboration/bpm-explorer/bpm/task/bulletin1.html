@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hello bulletin.html</title>
+    <link href="webjars/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <script src="webjars/jquery.min.js"></script>
+    <!--SockJS和STOMP javascript库，它们将用于通过websocket上的STOMP与我们的服务器通信。-->
+    <script src="webjars/sockjs.min.js"></script>
+    <script src="webjars/stomp.min.js"></script>
+    <!--来自tasklist-->
+    <link href="../../build/common/base.css" rel="stylesheet">
+    <script type="text/javascript" src="../../build/common/base.js"></script>
+    <script type="text/javascript" src="../../build/common/gridList.js"></script>
+    <!--导入了app.js，其中包含了客户端应用程序的逻辑。-->
+    <script src="app.js"></script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div id="main-content" class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="connect">连接公告板:</label>
+                    <button id="connect" class="btn btn-default" type="submit">接受公告</button>
+                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">不接收公告
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="name">发布任务</label>
+                    <input type="text" id="name" class="form-control" placeholder="Your name here...">
+                </div>
+                <button id="send" class="btn btn-default" type="submit">发送</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table id="conversation" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>公告</th>
+                </tr>
+                </thead>
+                <tbody id="greetings">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <table ab-grid data-id-field="id" data-url="/bpm/task/listJson">
+        <thead>
+        <tr>
+            <th data-checkbox="true"></th>
+            <th data-field="subject">流程标题</th>
+            <th data-field="name">任务名称</th>
+            <th data-field="assigneeNames">候选人</th>
+            <th data-field="createTime" data-formatter=dateTimeFormatter data-sort-name="create_time_" data-sortable="true">任务创建时间</th>
+            <th data-formatter="innerHtmlFormatter" data-title="管理">
+            </th>
+        </tr>
+        </thead>
+    </table>
+
+</div>
+</body>
+<script type="text/javascript">
+
+    var app=angular.module('myApp',[]);
+    app.controller('myCtrl',function ($scope,$http) {
+        $scope.send=function (){
+            $(document).ready(function(){
+                $("button").click(function(){
+                    $.post("agile-bpm-platform/bpm/task/getBpmTask",
+                        {
+                            id:"436485937633951745",
+
+                        },
+                        function(data,status){
+                            var jsondata=JSON.parse(data);
+                            var datas=jsondata.data;
+                            var subject=datas.subject;
+                            var name=datas.name;
+                            var time=datas.createTime;
+                            var des=subject+"\n任务名: "+name+"\n时间: ";
+
+                            alert("数据: " + data+ "\n状态: " + status+"\n任务: " + time);
+
+                        });
+                });
+            });
+
+
+        }
+
+    })
+</script>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html ng-app="app">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  	<link href="./build/common/base.css" rel="stylesheet">
+  	<link href="./assets/css/login.css" rel="stylesheet">
+  	
+  	<script type="text/javascript" src="./build/common/base.js"></script>
+	<script type="text/javascript" src="./build/common/ngEdit.js"></script>
+    <script>
+        if (window.top !== window.self) {
+            window.top.location = window.location;
+        }
+        
+        var app = angular.module('app', ['baseDirective']);
+		 app.controller("ctrl", [ '$scope', 'baseService', function($scope, baseService) {
+			 
+			 $scope.user = {password:"1",account:"admin"};
+		 	 $scope.login = function(){
+		 		var post = baseService.postForm(__ctx+"/org/login/valid",$scope.user);
+		 		 $.getResultData(post,function(){
+		 			window.location = "index.html";
+		 		})
+		 	 }
+		 	 
+		 }]);
+
+    </script>
+    <style type="text/css">
+    	.layui-layer-content {
+    		color: black;
+    	}
+    </style>
+
+</head>
+
+<body class="signin" ng-controller="ctrl">
+    <div class="signinpanel">
+        <div class="row">
+
+            <div class="col-sm-5">
+                <form>
+                    <h4 class="no-margins">登录：</h4>
+                    <p class="m-t-md">登录到业务流程协作平台</p>
+                    <input type="text" class="form-control uname" ng-model="user.account"  placeholder="用户名" />
+                    <input type="password" class="form-control pword m-b" ng-model="user.password" placeholder="密码" />
+                    <span class="btn btn-success btn-block" ng-click="login()">登录</span>
+                </form>
+            </div>
+        </div>
+        <div class="signup-footer">
+
+        </div>
+    </div>
+</body>
+
+</html>

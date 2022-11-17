@@ -1,0 +1,175 @@
+<div class="ivu-form ivu-form-label-right">
+	<script>
+		window.custFormComponentMixin = {
+			data : function() {
+				return {
+					"test" : "helloWorld"
+				};
+			},
+			created : function() {
+				console.log("脚本将会混入自定义表单组件中...");
+			},
+			methods : {
+				testaaa : function() {
+					alert(1)
+				}
+			}
+		}
+	</script>
+	<ul class="nav nav-tabs list-paddingleft-2">
+		<li class="active"><a href="#A">学校A</a></li>
+		<li><a href="#B">班级B</a></li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active" id="A">
+			<div class="ibox-title">学校信息</div>
+			<div class="panel-body">
+
+				<div class="col-xs-12 form-item" v-ab-permission:show="permission.SchoolStudent.School.name">
+					<label class="form-item-label">名字</label>
+					<div class="form-item-content">
+						<input type="text" class=" form-control" v-model="data.SchoolStudent.name" v-ab-permission="permission.SchoolStudent.School.name" desc="学校-名字" v-ab-validate="{&quot;maxlength&quot;:64,&quot;required&quot;:true}">
+					</div>
+				</div>
+				<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.School.createTime">
+					<label class="form-item-label">创建时间</label>
+					<div class="form-item-content">
+						<ab-date type="text" class=" form-control" v-model="data.SchoolStudent.createTime" v-ab-permission="permission.SchoolStudent.School.createTime" desc="学校-创建时间" v-ab-validate="{&quot;maxlength&quot;:50}" format="yyyy-MM-dd HH:mm:ss"></ab-date>
+					</div>
+				</div>
+				<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.School.amount">
+					<label class="form-item-label">人数</label>
+					<div class="form-item-content">
+						<input type="text" class=" form-control" v-model="data.SchoolStudent.amount" v-ab-permission="permission.SchoolStudent.School.amount" desc="学校-人数" v-ab-validate="{&quot;maxlength&quot;:10}">
+					</div>
+				</div>
+				<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.School.type">
+					<label class="form-item-label">类型</label>
+					<div class="form-item-content">
+						<input type="text" class=" form-control" v-model="data.SchoolStudent.type" v-ab-permission="permission.SchoolStudent.School.type" desc="学校-类型" v-ab-validate="{&quot;maxlength&quot;:64}">
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="tab-pane " id="B">
+			<div id="SchoolStudent-Class" table-key="Class" v-ab-permission:show="tablePermission.SchoolStudent.Class">
+				<div>
+					<div class="ibox-title">
+						<span class="title">班级信息</span>
+						<ab-sub-add href="javascript:void(0)" class="btn btn-primary btn-sm fa fa-plus" v-model="data.SchoolStudent.ClassList" v-bind:init-data="initData.SchoolStudent.Class" v-ab-permission:edit="tablePermission.SchoolStudent.Class">添加 </ab-sub-add>
+					</div>
+					<ab-sub-scope v-slot="{permission:permission,tablePermission:tablePermission}" :permissiona="permission" :table-permissiona="tablePermission" v-for="(Class,index) in data.SchoolStudent.ClassList">
+					<div class="col-xs-12">
+						<div class="pull-left">
+							<ab-sub-detail v-bind:sub-temp-data.sync="subTempData" pkey="Class" class="btn btn-link btn-sm fa fa-detail" v-model="data.SchoolStudent.ClassList[index]" dialog-id="SchoolStudent-Student" v-ab-permission:show="tablePermission.SchoolStudent.Student">学生详情</ab-sub-detail>
+						</div>
+
+						<ab-sub-del class="btn btn-danger btn-xs fa fa-delete pull-right" v-model="data.SchoolStudent.ClassList" v-bind:index="index" v-ab-permission:edit="tablePermission.SchoolStudent.Class">移除</ab-sub-del>
+					</div>
+					<div class="panel-body">
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Class.name">
+							<label class="form-item-label">名字</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Class.name" v-ab-permission="permission.SchoolStudent.Class.name" desc="班级-名字" v-ab-validate="{&quot;maxlength&quot;:255,&quot;required&quot;:true}">
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Class.amount">
+							<label class="form-item-label">人数</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Class.amount" v-ab-permission="permission.SchoolStudent.Class.amount" desc="班级-人数" v-ab-validate="{&quot;maxlength&quot;:10}">
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Class.banzhuren">
+							<label class="form-item-label">班主任</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Class.banzhuren" v-ab-permission="permission.SchoolStudent.Class.banzhuren" desc="班级-班主任" v-ab-validate="{&quot;maxlength&quot;:255}">
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Class.remark">
+							<label class="form-item-label">备注</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Class.remark" v-ab-permission="permission.SchoolStudent.Class.remark" desc="班级-备注" v-ab-validate="{&quot;maxlength&quot;:255}">
+							</div>
+						</div>
+					</div>
+					</ab-sub-scope>
+				</div>
+			</div>
+
+			<div id="SchoolStudent-Student" hide="" table-key="Student" v-ab-permission:show="tablePermission.SchoolStudent.Student">
+				<div v-if="subTempData.Class">
+					<div class="ibox-title">
+						<span class="title">学生信息</span>
+						<ab-sub-add href="javascript:void(0)" class="btn btn-primary btn-sm fa fa-plus" v-model="subTempData.Class.StudentList" v-bind:init-data="initData.SchoolStudent.Student" v-ab-permission:edit="tablePermission.SchoolStudent.Student">添加 </ab-sub-add>
+					</div>
+					<ab-sub-scope v-slot="{permission:permission,tablePermission:tablePermission}" :permissiona="permission" :table-permissiona="tablePermission" v-for="(Student,index) in subTempData.Class.StudentList">
+					<div class="col-xs-12">
+
+						<ab-sub-del class="btn btn-danger btn-xs fa fa-delete pull-right" v-model="subTempData.Class.StudentList" v-bind:index="index" v-ab-permission:edit="tablePermission.SchoolStudent.Student">移除</ab-sub-del>
+					</div>
+					<div class="panel-body">
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.mz">
+							<label class="form-item-label">名字</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Student.mz" v-ab-permission="permission.SchoolStudent.Student.mz" desc="学生-名字" v-ab-validate="{&quot;maxlength&quot;:50,&quot;required&quot;:true}">
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.xb">
+							<label class="form-item-label">性别</label>
+							<div class="form-item-content">
+								<select class=" form-control" v-model="Student.xb" v-ab-permission="permission.SchoolStudent.Student.xb" desc="学生-性别" v-ab-validate="{&quot;maxlength&quot;:50}"><option value="">请选择</option>
+									<option value="1">男</option>
+									<option value="2">女</option></select>
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.ah">
+							<label class="form-item-label">爱好</label>
+							<div class="form-item-content">
+								<ab-checkbox v-model="Student.ah" v-ab-permission="permission.SchoolStudent.Student.ah" desc="学生-爱好" v-ab-validate="{&quot;maxlength&quot;:50}">
+								<div slot-scope="scope">
+									<label class=" checkbox-inline"><input type="checkbox" v-model="scope.tempData.currentValue" value="yy" name="SchoolStudent-Student-ah" v-ab-permission="permission.SchoolStudent.Student.ah">游泳</label> <label class=" checkbox-inline"><input
+										type="checkbox" v-model="scope.tempData.currentValue" value="ymq" name="SchoolStudent-Student-ah" v-ab-permission="permission.SchoolStudent.Student.ah">羽毛器</label> <label class=" checkbox-inline"><input type="checkbox"
+										v-model="scope.tempData.currentValue" value="lq" name="SchoolStudent-Student-ah" v-ab-permission="permission.SchoolStudent.Student.ah">篮球</label>
+								</div>
+								</ab-checkbox>
+							</div>
+						</div>
+						<div class="col-xs-12 form-item" v-ab-permission:show="permission.SchoolStudent.Student.remark">
+							<label class="form-item-label">备注</label>
+							<div class="form-item-content">
+								<textarea type="text" class=" form-control" v-model="Student.remark" v-ab-permission="permission.SchoolStudent.Student.remark" desc="学生-备注" v-ab-validate="{&quot;maxlength&quot;:255}"></textarea>
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.zjlx">
+							<label class="form-item-label">证件类型</label>
+							<div class="form-item-content">
+								<ab-dict type="text" class=" input-div" v-model="Student.zjlx" v-ab-permission="permission.SchoolStudent.Student.zjlx" desc="学生-证件类型" v-ab-validate="{&quot;maxlength&quot;:50}" dict-key="idtype"></ab-dict>
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.nl">
+							<label class="form-item-label">年龄</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Student.nl" v-ab-permission="permission.SchoolStudent.Student.nl" desc="学生-年龄" v-ab-validate="{&quot;number&quot;:true,&quot;maxlength&quot;:10}">
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.sr">
+							<label class="form-item-label">生日</label>
+							<div class="form-item-content">
+								<ab-date type="text" class=" form-control" v-model="Student.sr" v-ab-permission="permission.SchoolStudent.Student.sr" desc="学生-生日" v-ab-validate="{&quot;maxlength&quot;:50}" format="yyyy-MM-dd HH:mm:ss"></ab-date>
+							</div>
+						</div>
+						<div class="col-xs-6 form-item" v-ab-permission:show="permission.SchoolStudent.Student.zd">
+							<label class="form-item-label">子弹</label>
+							<div class="form-item-content">
+								<input type="text" class=" form-control" v-model="Student.zd" v-ab-permission="permission.SchoolStudent.Student.zd" desc="学生-子弹" v-ab-validate="{&quot;maxlength&quot;:255}">
+							</div>
+						</div>
+					</div>
+					</ab-sub-scope>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
