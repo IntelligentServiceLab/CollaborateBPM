@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>任务发布页面</title>
+    <!--在该页面中要展示的是自己发布的所有任务名称-->
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <script th:src="@{/lib/layui-v2.6.3/layui.js}"></script>
+</head>
+<body>
+test
+<table id="tasksTable" lay-filter="tasksTableBar"></table>
+<!--id值是给表格渲染使用的，lay-filter是给工具条事件绑定使用的-->
+<script type="text/html" id="barDemo">
+    <!--这里的id主要是将其绑定在各行之中-->
+    <a class="layui-btn layui-btn-xs" lay-event="communicationProgress">沟通进度</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="cancelTask">任务取消</a>
+</script>
+
+<!-- 注意：属性 lay-event="" 是模板的关键所在，值可随意定义。 -->
+<script th:inline="javascript">
+    layui.use(['table', 'layer'], function () {
+        let table = layui.table;
+        let $ = layui.$;
+        table.render({
+            elem: '#tasksTable'
+            , toolbar: true//开启表格头部工具栏打印等，工具栏不等于工具条
+            , defaultToolbar: ['filter', 'print', 'exports']//第一个是筛选，也就是选择列显示
+            , url: '/getMyAllTasksList?publisher=1'//得到自己发布的所有任务列表
+            , page: true //开启分页
+            , title: "已发布任务"    //定义 table 的大标题（在文件导出等地方会用到）
+            , cols: [
+                [ //表头
+                    {type: 'numbers', title: '序号', width: 80, fixed: 'left'}//序号列
+                    , {field: 'title', title: '任务名称', width: 150, sort: true}
+                    , {field: 'taskType', title: '任务类型', width: 100}
+                    , {field: 'description', title: '任务具体描述', width: 150}
+                    , {field: 'images', title: '具体规格要求', width: 140}
+                    , {field: 'publishTime', title: '发布时间', width: 150}
+                    , {field: 'taskStatus', title: '任务所处状态', width: 200, sort: true}
+                    , {fixed: 'right', title: '操作', width: 200, align: 'center', toolbar: '#barDemo'}//每行有沟通进度和任务取消
+                ]
+            ]
+        });
+        //监听工具条
+        table.on('tool(tasksTableBar)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+            //data["account"] = [[${#httpSession.getAttribute('account')}]]
+            //console.log(data.account)
+            //添加成功
+            if (layEvent === 'communicationProgress') { //查看
+                //do somehing
+                layer.alert('进入聊天室喽');
+            } else if (layEvent === 'del') { //删除
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                    layer.close(index);
+                    //向服务端发送删除指令
+                });
+            } else if (layEvent === 'edit') { //编辑
+                //do something
+                layer.alert('进入聊天室喽');
+                //同步更新缓存对应的值
+                obj.update({
+                    username: '123'
+                    , title: 'xxx'
+                });
+            } else if (layEvent === 'LAYTABLE_TIPS') {
+                layer.alert('Hi，头部工具栏扩展的右侧图标。');
+            }
+        });
+    })
+
+</script>
+</body>
+</html>
