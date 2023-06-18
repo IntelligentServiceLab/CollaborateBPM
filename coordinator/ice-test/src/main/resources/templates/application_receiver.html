@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!--在该页面中要展示的是自己发布的所有任务名称-->
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <script th:src="@{/lib/layui-v2.6.3/layui.js}"></script>
+    <!--引入jquery方便表格引入图片，进行展示-->
+    <script type="text/javascript" src="http://libs.baidu.com/jquery/1.8.3/jquery.min.js"></script>
+    <title>查看申请</title>
+</head>
+<body>
+<!--点击接收者弹出窗的表单-->
+<div class="layui-row form-add-project" style="display: none">
+    <form class="layui-form" action="" id="receiverMessageForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label">处理人</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" required lay-verify="required" placeholder="请输入处理人名称"
+                       autocomplete="off" class="layui-input layui-disabled">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" name="email" required lay-verify="required|email" placeholder="请输入处理人邮箱"
+                       autocomplete="off" class="layui-input layui-disabled">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="telephone" required lay-verify="required|phone" placeholder="请输入处理人电话"
+                       autocomplete="off" class="layui-input layui-disabled">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">微信</label>
+            <div class="layui-input-block">
+                <input type="text" name="weichat" required lay-verify="required" placeholder="请输入处理人微信"
+                       autocomplete="off" class="layui-input layui-disabled">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">公司</label>
+            <div class="layui-input-block">
+                <input type="text" name="company" required lay-verify="required" placeholder="请输入处理人公司"
+                       autocomplete="off" class="layui-input layui-disabled">
+            </div>
+        </div>
+    </form>
+</div>
+<h1 style="text-align: center">任务申请表</h1>
+<table id="applyTable" lay-filter="tasksTableBar"></table>
+<!--id值是给表格渲染使用的，lay-filter是给各种事件绑定使用的-->
+<!--自定义一个工具条模板-->
+<script type="text/html" id="barDemo">
+    <!--这里的id主要是将其绑定在各行之中-->
+    <a class="layui-btn layui-btn-xs" lay-event="agree">同意</a>
+</script>
+<!--自定义一个表格图片模板-->
+<script type="text/html" id="picImg">
+    <div>
+        <img src="{{ d.images }}" width="80px" height="45px"/>
+    </div>
+</script>
+<script th:inline="javascript">
+    let username = [[${username}]];
+    layui.use(['table', 'layer', 'form'], function () {
+        let table = layui.table;
+        let $ = layui.$;
+        table.render({
+            elem: '#applyTable'
+            , toolbar: true//开启表格头部工具栏打印等，工具栏不等于工具条
+            , defaultToolbar: ['filter', 'print', 'exports']//第一个是筛选，也就是选择列显示
+            , url: '/apply/getApplyListByPublisher?username=' + username//得到所有我发布任务的申请表，这个申请表每个申请都是等待处理的
+            , page: true //开启分页
+            , title: "正在申请的任务"    //定义 table 的大标题（在文件导出等地方会用到）
+            , cols: [
+                [ //表头
+                    {type: 'numbers', title: '序号', align: "center", width: "5%", fixed: 'left', sort: true}//序号列
+                    , {field: 'title', title: '任务名称', align: "center", width: "10%"}
+                    , {field: 'description', title: '任务具体描述', align: "center", width: "30%"}
+                    , {
+                    field: 'images',
+                    title: '具体规格要求',
+                    align: "center",
+                    width: "20%",
+                    templet: '#picImg',
+                    event: 'images'
+                }
+                    , {field: 'cname', title: '申请公司', align: "center", width: "10%"}
+                    , {field: 'username', title: '任务申请人', align: "center", width: "10%", event: 'receiver'}
+                    , {field: 'publishTime', title: '发布时间', align: "center", width: "11%", sort: true}
+                    , {fixed: 'right', title: '操作', align: "center", width: 200, toolbar: '#barDemo'}//每行有沟通进度和任务取消
+                ]
+            ]
+        });
+
+        //table事件函数：table.on('event(filter)', callback);
+        //工具条事件
+        table.on('tool(tasksTableBar)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值",里面不需要双引号
+            let data = obj.data; //获得当前行数据
+            let layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            //任务审批的时候只需要同意自己想要的就可以了，其他人的申请不用拒绝
+            if (layEvent === 'agree') {//点击同意按钮,既要更改申请表的状态为1，同时还要对task表进行更改
+                //为了防止再次同意，所以我们要删除前端行
+                layer.confirm('确定同意该申请吗', function (index) {
+                    obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                    $.ajax({
+                        //这里receiver实际只是申请公司账号，同意之后把他注册为处理公司
+                        url: "/apply/agreeApply?applyId=" + data.id + "&receiver=" + data.receiver + "&telephone=" + data.telephone + "&title=" + data.title,
+                        async: false,
+                        success: function (res) {
+                            //判断后端返回结果
+                            if (res.code == 0) {
+                                return layer.msg(res.msg);
+                            } else {
+                                return layer.msg('接收失败');
+                            }
+                        }
+                    })
+                });
+            }//点击图片事件
+            else if (layEvent === 'images') {//单击图片
+                let img = "<img src='" + obj.data.images + "' style='height: 300px;width: 300px'>"//展示图片
+                layer.open({
+                    title: obj.data.title + '的规格要求'
+                    , area: [img.width + "px", img.height + 'px']
+                    , content: img
+                    , btnAlign: 'c'
+                });
+            }//点击接收者名字
+            else if (layEvent === 'receiver') {//点击接收者名字，要返回接收者所属的公司信息以及自己的联系方式.我们表格渲染的时候就一次性全部返回了，只是没有显示，可以直接调用
+                $("input")[0].setAttribute("value", data.username);  //处理人名称
+                $("input")[1].setAttribute("value", data.email);     //处理人邮箱
+                $("input")[2].setAttribute("value", data.telephone); //处理人电话
+                $("input")[3].setAttribute("value", data.weichat);   //处理人微信
+                $("input")[4].setAttribute("value", data.cname);   //处理人公司名称
+                layer.open({
+                    title: '处理者信息'
+                    , area: '340px'
+                    , content: $(".form-add-project").html()//放置dom对象，实际是绑定关系
+                    , btnAlign: 'c'
+                });
+            }
+            obj.stoppropagation();//防止行事件和工具条冲突
+        });
+
+
+    })
+</script>
+</body>
+</html>

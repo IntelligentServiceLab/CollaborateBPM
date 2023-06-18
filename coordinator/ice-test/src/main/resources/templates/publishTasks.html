@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>发布任务</title>
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <script th:src="@{/lib/layui-v2.6.3/layui.js}"></script>
+</head>
+<body>
+<form class="layui-form" action="" id="addTaskForm">
+    <div class="layui-form-item">
+        <label class="layui-form-label">任务名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required lay-verify="required" placeholder="请输入任务的名称"
+                   autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">预估费用</label>
+        <div class="layui-input-block">
+            <input type="text" name="price" required lay-verify="number" placeholder="任务预估花费(元)"
+                   autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">任务领域</label>
+        <div class="layui-input-block">
+            <select name="taskType" lay-verify="required">
+                <option value="">请选择任务的领域</option>
+                <option value="船舶配件">船舶配件</option>
+                <option value="物流运输">物流运输</option>
+                <option value="能源供应">能源供应</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮箱</label>
+        <div class="layui-input-block">
+            <input type="text" name="email" required lay-verify="required|email" placeholder="请输入联系邮箱"
+                   autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">截止日期</label>
+        <div class="layui-input-block">
+            <input type="text" name="endTime" required lay-verify="required" placeholder="填写任务完成截止时间" id="endTime"
+                   autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">备注信息</label>
+        <div class="layui-input-block">
+            <textarea name="description" lay-verify="required" placeholder="请输入任务的备注信息"
+                      class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <!--************这里是上传图片的代码***************-->
+    <!--************这里添加的隐藏的输入框，用来传递images的路径参数***************-->
+    <input type="hidden" name="images" class="image">
+    <div class="layui-form-item">
+        <label class="layui-form-label ">规格要求</label>
+        <div class="layui-upload">
+            <button type="button" class="layui-btn" id="test1">上传规格详情</button>
+        </div>
+        <label class="layui-form-label "></label>
+        <div class="layui-upload-list">
+            <img class="layui-upload-img" height="200px" id="demo1">
+            <p id="demoText"></p>
+        </div>
+    </div>
+    <!--************上面里是上传图片的代码***************-->
+    <br>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+<script th:inline="javascript">
+    let publisher=[[${publisher}]];
+    console.log(publisher)
+    //Demo
+    layui.use(['form', 'upload', 'laydate'], function () {
+        let form = layui.form;
+
+        let $ = layui.jquery
+            , upload = layui.upload;
+
+        var laydate = layui.laydate;
+
+        //任务截止日期实例
+        laydate.render({
+            elem: '#endTime' //指定元素
+            ,format: 'yyyy年MM月dd日'
+            ,min: 0 //昨天前都不能设置
+        });
+
+        //监听提交，提交完之后不要跳转页面，因此推荐ajax提交数据
+        form.on('submit(formDemo)', function (data) {
+            let date = new Date()
+            /*这里注意js获取月份是从0开始的，因此要加1*/
+            data.field['publishTime'] = date.getFullYear() + "年" + (date.getMonth()+1) + "月" + date.getDate() + "月"
+            data.field['publisher'] = publisher;
+            var data = JSON.stringify(data.field);//表格数据要转为json格式进行传输
+            $.ajax({
+                url: '/submitTask',
+                type: 'post',
+                dataType: 'json',//告知服务器，希望返回json格式。如果不写则自动去判断服务器返回数据类型
+                contentType: "application/json",//告知服务器，发送的数据是json格式
+                data: data,
+                success: function (res) {
+                    //判断后端返回结果
+                    if (res.code == 0) {
+                        //返回成功则表单重置
+                        $("#addTaskForm")[0].reset();
+                        $('#demo1').attr('src', "");
+                        layui.form.render();
+                        return layer.msg('任务发布成功');
+                    } else {
+                        return layer.msg('任务名不能重复');
+                    }
+                }
+            })
+            //返回false，表示不刷新整个页面，即在点击reset之后不刷新页面，而是只刷新Form表单
+            return false;
+        });
+
+
+        //普通图片上传:这里我们看到，未点击提交前，图片就已经传送给了后端
+        var uploadInst = upload.render({
+            elem: '#test1'
+            , url: '/uploadTask/'
+            , accept: 'images'
+            , size: 50000
+            , before: function (obj) {
+
+                obj.preview(function (index, file, result) {
+
+                    $('#demo1').attr('src', result);
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #4cae4c;">上传成功</span>');
+
+                var fileupload = $(".image");
+                fileupload.attr("value", res.data.src);
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
