@@ -40,7 +40,14 @@ public class InfoController {
         String cname = companyService.getCnameByAccount(suplier.getName());
         suplier.setCname(cname);
         ReceiverMessage receiverMessage = new ReceiverMessage(suplier.getManager(),suplier.getName(),suplier.getEmail(),suplier.getTelephone(),suplier.getWeichat());
-        suplierService.insertSuplier(suplier);//插入公司名称，存入基本信息
+        suplierService.insertSuplier(suplier);//插入服务，存入基本信息
+        ReceiverMessage receiverByTelephone = receiverMessageService.getReceiverByTelephone(suplier.getTelephone());
+        if(receiverByTelephone==null){//该员工第一次接收任务，直接插入数据
+            System.out.println("第一次处理人信息提交");
+        }else{
+            System.out.println("非第一次提交，对原有数据不要进行删除直接插入操作");
+            receiverMessageService.deleteReceiverMessageByTelephone(suplier.getTelephone());//避免主键重复
+        }
         receiverMessageService.insertReceiverMessage(receiverMessage);//注册处理人信息
         Map map = new HashMap();
         map.put("code",0);

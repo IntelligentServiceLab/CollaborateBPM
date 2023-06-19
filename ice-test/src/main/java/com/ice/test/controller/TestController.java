@@ -42,7 +42,6 @@ public class TestController {
         System.out.println(supliers);
         hashMap.put("code",0);
         hashMap.put("msg","成功");
-        hashMap.put("count",supliers.size());
         hashMap.put("data",supliers);
         return hashMap;
     }
