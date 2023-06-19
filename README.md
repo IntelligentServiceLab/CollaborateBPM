@@ -23,4 +23,5 @@
     - [**Discussion**](http://waitmoon.com/docs/#/en/?id=exchange-discussion)
     - [**Configuration experience(ice-test&ice-server real deployment)**](http://waitmoon.com/)
 
+这个项目包含基本的Spring Boot项目代码，主要用于以后开发时复制学习 其中可以参考的主要是ice-tes包。在里面设计了Mybatis返回集合还是实体以及实现xml的映射map。 另外项目还补充了响应结果类，以后禁止使用map、Object直接返回结果。 另外项目也对拦截器进行了书写，注意最后使用拦截器。如果学习了Spring Security可以不使用上述代码 最后前端项目中，对layui table、layer、form模块进行了更深的使用，包括点击点击单元格事件、弹出框中展示表单。前端书写了常用的登录和注册页面供使用
 最新项目6月19日
