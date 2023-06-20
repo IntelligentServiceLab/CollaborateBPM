@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ice.test.mapper.ChatMessageMapper">
+
+    <insert id="insertMessage">
+        INSERT INTO chat_message(text, sender, receiver, sendtime)
+        VALUES (#{text}, #{sender}, #{receiver}, #{sendtime});
+    </insert>
+    <select id="selectMessageHistory" resultType="com.ice.test.domain.ChatMessage">
+        SELECT *
+        FROM chat_message
+        WHERE (sender = #{sender} AND receiver = #{receiver})
+           OR (sender = #{receiver} AND receiver = #{sender})
+    </select>
+</mapper>

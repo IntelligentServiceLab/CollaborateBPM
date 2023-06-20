@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ice.test.mapper.TaskMapper">
+
+    <insert id="InsertTask">
+        INSERT INTO tasks(title, task_type, description, images, publish_time, end_time, publisher, price, receiver,
+                          task_status, email, telephone,task_process)
+        VALUES (#{title}, #{taskType}, #{description}, #{images}, #{publishTime}, #{endTime}, #{publisher}, #{price},
+                #{receiver}, #{taskStatus}, #{email}, #{telephone},#{taskProcess})
+    </insert>
+
+
+    <resultMap id="task" type="com.ice.test.domain.Task">
+        <!--结果映射：将数据库task与对象task进行映射，两者键值对不同-->
+        <!-- 定义普通列封装规则 -->
+        <result column="task_type" property="taskType"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="task_process" property="taskProcess"/>
+        <!-- 其他不指定的列会自动封装：但是建议我们只要写resultMap就把全部的映射规则都写上-->
+    </resultMap>
+    <select id="selectMyPublishTasks" resultMap="task">
+        SELECT *
+        FROM tasks
+        WHERE publisher = #{publisher}
+          AND task_status != 4
+    </select>
+
+    <select id="getOtherAllTasksList" resultMap="task">
+        SELECT *
+        FROM tasks
+        WHERE publisher != #{publisher}
+          AND task_status != 4
+    </select>
+
+    <select id="selectMyTasks" resultMap="task">
+        SELECT *
+        FROM tasks
+        WHERE receiver = #{username}
+          AND task_status = 1
+    </select>
+
+
+    <select id="selectTaskByTitle" resultMap="task">
+        SELECT *
+        FROM tasks
+        WHERE title = #{title}
+    </select>
+
+    <select id="getTaskProcessByTitle" resultType="java.lang.String">
+        SELECT task_process
+        FROM tasks
+        WHERE title = #{title}
+    </select>
+
+    <update id="updateTaskStatus">
+        UPDATE tasks
+        SET task_status = #{status}
+        WHERE title = #{title}
+    </update>
+
+    <update id="updateTaskReceiver">
+        UPDATE tasks
+        SET receiver = #{receiver}
+        WHERE title = #{title}
+    </update>
+    <update id="updateTaskTelephone">
+        UPDATE tasks
+        SET telephone= #{telephone}
+        WHERE title = #{title}
+    </update>
+    <update id="updateTaskProcess">
+        UPDATE tasks
+        SET task_process= #{taskProcess}
+        WHERE title = #{title}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ice.test.mapper.ApplyMapper">
+
+    <insert id="insertApply">
+        INSERT INTO ice_apply(title, account, telephone, apply_status, publisher)
+        values (#{title}, #{account}, #{telephone}, #{applyStatus}, #{publisher})
+    </insert>
+    <update id="updateApplyStatusById">
+        UPDATE ice_apply
+        SET apply_Status = #{applyStatus}
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteApplyByTitle">
+        DELETE
+        FROM ice_apply
+        WHERE title =
+              #{title}
+    </delete>
+
+    <resultMap id="apply" type="com.ice.test.domain.Apply">
+        <!--结果映射：将数据库task与对象task进行映射，两者键值对不同-->
+        <!-- 定义普通列封装规则 -->
+        <result column="apply_status" property="applyStatus"/>
+        <!-- 其他不指定的列会自动封装：但是建议我们只要写resultMap就把全部的映射规则都写上-->
+    </resultMap>
+
+    <select id="selectApplyListByPublisher" resultMap="apply">
+        SELECT *
+        FROM ice_apply
+        WHERE publisher = #{publisher}
+    </select>
+
+    <select id="selectApplyListByTitleAndStatus" resultMap="apply">
+        SELECT *
+        FROM ice_apply
+        WHERE title = #{title}
+          AND apply_status = #{applyStatus} LIMIT 1;
+    </select>
+
+    <select id="selectApplyListByTitle" resultMap="apply">
+        SELECT *
+        FROM ice_apply
+        WHERE title = #{title}
+    </select>
+
+    <select id="selectApplyListByAccount" resultMap="apply">
+        SELECT *
+        FROM ice_apply
+        WHERE account = #{account}
+    </select>
+</mapper>
