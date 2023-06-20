@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>任务聊天室</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            height: 760px;
+            width: 900px;
+            border-radius: 4px;
+            border: 0.5px solid #e0e0e0;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-flow: column;
+            overflow: hidden;
+        }
+
+        .top {
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+        .content {
+            width: calc(100% - 40px);
+            padding: 20px;
+            overflow-y: scroll;
+            flex: 1;
+        }
+
+        .content:hover::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .bubble {
+            max-width: 400px;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+            color: #000;
+            word-wrap: break-word;
+            word-break: normal;
+        }
+
+        .item-left .bubble {
+            margin-left: 15px;
+            background-color: #fff;
+        }
+
+        .item-left .bubble:before {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-right: 10px solid #fff;
+            border-bottom: 10px solid transparent;
+            left: -20px;
+        }
+
+        .item-right .bubble {
+            margin-right: 15px;
+            background-color: #9eea6a;
+        }
+
+        .item-right .bubble:before {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #9eea6a;
+            border-top: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            right: -20px;
+        }
+
+        .item {
+            margin-top: 15px;
+            display: flex;
+            width: 100%;
+        }
+
+        .item.item-right {
+            justify-content: flex-end;
+        }
+
+        .item.item-center {
+            justify-content: center;
+        }
+
+        .item.item-center span {
+            font-size: 12px;
+            padding: 2px 4px;
+            color: #fff;
+            background-color: #dadada;
+            border-radius: 3px;
+            -moz-user-select: none; /*火狐*/
+            -webkit-user-select: none; /*webkit浏览器*/
+            -ms-user-select: none; /*IE10*/
+            -khtml-user-select: none; /*早期浏览器*/
+            user-select: none;
+        }
+
+        .avatar img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+        }
+
+        .input-area {
+            border-top: 0.5px solid #e0e0e0;
+            height: 150px;
+            display: flex;
+            flex-flow: column;
+            background-color: #fff;
+        }
+
+        textarea {
+            flex: 1;
+            padding: 5px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            overflow-y: auto;
+            overflow-x: hidden;
+            outline: none;
+            resize: none;
+        }
+
+        .button-area {
+            display: flex;
+            height: 40px;
+            margin-right: 10px;
+            line-height: 40px;
+            padding: 5px;
+            justify-content: flex-end;
+        }
+
+        .button-area button {
+            width: 80px;
+            border: none;
+            outline: none;
+            border-radius: 4px;
+            float: right;
+            cursor: pointer;
+        }
+
+        /* 设置滚动条的样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        /* 滚动槽 */
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        /* 滚动条滑块 */
+        ::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0);
+            -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.5);
+        }
+
+    </style>
+    <!--在该页面中要展示的是自己发布的所有任务名称-->
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <script th:src="@{/lib/layui-v2.6.3/layui.js}"></script>
+</head>
+<body>
+<div class="container">
+    <!--信息栏：主要包括聊天对象、消息栏和发送栏-->
+    <div class="top" th:text="${toUserName}">
+    </div>
+    <div class="content">
+    </div>
+    <div class="input-area">
+        <!--发送栏-->
+        <textarea name="text" id="textarea"></textarea>
+        <div class="button-area">
+            <button id="send-btn" onclick="send()">发 送</button>
+        </div>
+    </div>
+</div>
+</body>
+<script th:inline="javascript">
+
+    let webSocket;
+    let username = [[${username}]]
+    let toUserName = [[${toUserName}]]
+    let method = [[${method}]]
+    //chatMessages:[{text: 'fdewfwf', sender: '1', receiver: '2', sendtime: '2023年03月11日'},{...}]
+    let chatMessages = [[${chatMessages}]] //是一个数组，里面存储了双方过去交流的所有信息
+
+    //在进入聊天室时要给出提示:您已进入聊天室
+    let item0 = document.createElement('div');
+    item0.className = 'item item-center';
+    item0.innerHTML = `<span>` + '你已进入聊天室，现在可以开始聊天了。' + `</span>`;
+    document.querySelector('.content').appendChild(item0);
+    document.querySelector('#textarea').value = '';
+    document.querySelector('#textarea').focus();
+    //滚动条置底
+    let height = document.querySelector('.content').scrollHeight;
+    document.querySelector(".content").scrollTop = height;
+
+    /*
+    * 渲染历史记录
+    * 关于时间是否显示，我们按照日期划分，只有日期不同时才会显示时间，这是一个数组去重问题
+    * */
+    let date = new Date();//获取当前时间，当日期是昨天时则显示“昨日”否则显示正常日期
+    for (let i = 0; i < chatMessages.length; i++) {
+        let datetime = new Date(chatMessages[i].sendtime)
+        /*
+        * 第一步：判断这个消息是否需要显示时间
+        * 第二步：其次就是打印该消息
+        * */
+        //判断需要显示时间的情况
+        if (i == 0) {
+            let item1 = document.createElement('div');
+            //第一条消息直接显示日期就行了：如果是今天就只是显示时分，是昨天就显示昨天，是其它日期就直接显示日期
+            if (datetime.getFullYear() == date.getFullYear() && datetime.getMonth() == date.getMonth() && datetime.getDate() == date.getDate()) {
+                //是今天
+                item1.className = 'item item-center';
+                item1.innerHTML = `<span>` + datetime.getHours() + ':' + datetime.getMinutes() + `</span>`;
+            } else if (datetime.getFullYear() == date.getFullYear() && datetime.getMonth() == date.getMonth() && (datetime.getDate() == date.getDate() - 1)) {
+                //是昨天
+                item1.className = 'item item-center';
+                item1.innerHTML = `<span>` + '昨天 ' + datetime.getHours() + ':' + datetime.getMinutes() + `</span>`;
+            } else {
+                //前天及以前
+                item1.className = 'item item-center';
+                item1.innerHTML = `<span>` + datetime.getMonth() + 1 + '月' + datetime.getDate() + '日 ' + datetime.getHours() + ':' + datetime.getMinutes() + `</span>`;
+            }
+            document.querySelector('.content').appendChild(item1);
+        } else {
+            let datetime2 = new Date(chatMessages[i - 1].sendtime)
+            //判断是不是过了一天：是同一天的就不用显示日期了，不是同一天就显示日期
+            if (datetime.getDate() != datetime2.getDate()) {
+                let item1 = document.createElement('div');//不是同一天必然需要显示时间
+                //差别一天；判断是不是今天，如果是今天就只是显示时分，是昨天就显示昨天，是其它日期就直接显示日期
+                if (datetime.getFullYear() == date.getFullYear() && datetime.getMonth() == date.getMonth() && datetime.getDate() == date.getDate()) {
+                    //是今天
+                    item1.className = 'item item-center';
+                    item1.innerHTML = `<span>` + datetime.getHours() + ':' + datetime.getMinutes() + `</span>`;
+                } else if (datetime.getFullYear() == date.getFullYear() && datetime.getMonth() == date.getMonth() && (datetime.getDate() == date.getDate() - 1)) {
+                    //是昨天
+                    item1.className = 'item item-center';
+                    item1.innerHTML = `<span>` + '昨天 ' + datetime.getHours() + ':' + datetime.getMinutes() + `</span>`;
+                } else {
+                    //前天及以前
+                    item1.className = 'item item-center';
+                    item1.innerHTML = `<span>` + datetime.getMonth() + 1 + '月' + datetime.getDate() + '日 ' + datetime.getHours() + ':' + datetime.getMinutes() + `</span>`;
+                }
+                document.querySelector('.content').appendChild(item1);
+            }
+        }
+        //第二步:显示消息
+        let item = document.createElement('div');
+        if (chatMessages[i].sender === username) {//我发送的这个消息
+            if (method === 1) { //发送者为接收者，也就是说我为任务处理者，接收到该消息，男孩头像
+                item.className = 'item item-right';
+                item.innerHTML = `<div class="bubble bubble-right">` + chatMessages[i].text + `</div><div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s2WPZ.png" /></div>`;
+            } else {
+                item.className = 'item item-right';
+                item.innerHTML = `<div class="bubble bubble-right">` + chatMessages[i].text + `</div><div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s20tF.png" /></div>`;
+            }
+        } else {//别人发布的消息
+            if (method == 1) {
+                //发送者为接收者，因此对方为发布者
+                item.className = 'item item-left';
+                item.innerHTML = `<div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s20tF.png" /></div><div class="bubble bubble-left">` + chatMessages[i].text + `</div>`;
+            } else {
+                item.className = 'item item-left';
+                item.innerHTML = `<div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s2WPZ.png" /></div><div class="bubble bubble-left">` + chatMessages[i].text + `</div>`;
+            }
+        }
+        document.querySelector('.content').appendChild(item);
+        document.querySelector('#textarea').value = '';
+        document.querySelector('#textarea').focus();
+        //滚动条置底
+        let height = document.querySelector('.content').scrollHeight;
+        document.querySelector(".content").scrollTop = height;
+    }
+
+
+    function send() {
+        let text = document.querySelector('#textarea').value;
+        if (!text) {
+            alert('请输入内容');
+            return;
+        }
+        let item = document.createElement('div');
+        if (method === 1) { //发送者为接收者
+            item.className = 'item item-right';
+            item.innerHTML = `<div class="bubble bubble-right">${text}</div><div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s2WPZ.png" /></div>`;
+        } else {
+            item.className = 'item item-right';
+            item.innerHTML = `<div class="bubble bubble-right">${text}</div><div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s20tF.png" /></div>`;
+        }
+        document.querySelector('.content').appendChild(item);
+        document.querySelector('#textarea').value = '';
+        document.querySelector('#textarea').focus();
+        //滚动条置底
+        let height = document.querySelector('.content').scrollHeight;
+        document.querySelector(".content").scrollTop = height;
+        //websocket转发消息:发送者名称、message
+        let message = {
+            "text": text,
+            "to": toUserName
+        };
+        webSocket.send(JSON.stringify(message), username)
+    }
+
+    if ("WebSocket" in window) {
+        webSocket = new WebSocket("ws://localhost:8082/chat/" + username);
+
+        //一下都是多线程状态，也就是一直处于监听状态
+        //连通之后的回调事件
+        webSocket.onopen = function () {
+            console.log("已经连通了websocket");
+        };
+
+        //接收后台服务端的消息:实际上第一次进入时就会接到后端数据，告知在线人数,这里只需要两个人，因此后端此处只会转发消息而不用告知谁在线
+        webSocket.onmessage = function (evt) {
+            let received_msg = evt.data;
+            console.log("数据已接收:" + received_msg);
+            let obj = JSON.parse(received_msg);
+            let text = obj.text
+            let item = document.createElement('div');
+            if (method == 1) {
+                //发送者为接收者，因此对方为发布者
+                item.className = 'item item-left';
+                item.innerHTML = `<div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s20tF.png" /></div><div class="bubble bubble-left">${text}</div>`;
+            } else {
+                item.className = 'item item-left';
+                item.innerHTML = `<div class="avatar"><img src="https://i.328888.xyz/2023/03/11/s2WPZ.png" /></div><div class="bubble bubble-left">${text}</div>`;
+            }
+
+            document.querySelector('.content').appendChild(item);
+            document.querySelector('#textarea').value = '';
+            document.querySelector('#textarea').focus();
+            //滚动条置底
+            let height = document.querySelector('.content').scrollHeight;
+            document.querySelector(".content").scrollTop = height;
+        };
+
+        //连接关闭的回调事件
+        webSocket.onclose = function () {
+            console.log("连接已关闭...");
+            setMessageInnerHTML("连接已经关闭....");
+        };
+    } else {
+        // 浏览器不支持 WebSocket
+        alert("您的浏览器不支持 WebSocket!");
+    }
+
+</script>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>恒银-注册</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+    <link rel="stylesheet" th:href="@{/js/lay-module/step-lay/step.css}" media="all">
+    <style>
+        #stepForm {
+            height: 800px !important;
+        }
+    </style>
+</head>
+<body>
+                    <div>
+                        <form class="layui-form layui-form-pane"
+                              style="margin: 0 auto;max-width: 460px;padding-top: 40px;"
+                              id="form1">
+                            <!--action="toQuestionnaire"-->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">公司名:</label>
+                                <div class="layui-input-block">
+                                    <input type="input" placeholder="请输入公司名称" value="" class="layui-input"
+                                           required id="username1" name="cname">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">账号:</label>
+                                <div class="layui-input-block">
+                                    <input type="input" placeholder="请输入电话号码" value="" class="layui-input"
+                                           lay-verify="number|phone" required id="account1" name="account">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">密码:</label>
+                                <div class="layui-input-block">
+                                    <input type="password" placeholder="请设置密码" class="layui-input" required
+                                           id="password1" name="password"/>
+                                </div>
+                            </div>
+                            <div class="layui-form-item" style="text-align: center">
+                                    <button class="layui-btn" lay-submit lay-filter="formStep" id="formStep">
+                                        注册
+                                    </button>
+                                    <button class="layui-btn layui-btn-primary login">返回登录</button>
+                            </div>
+                        </form>
+                    </div>
+
+
+<script th:src="@{/lib/layui-v2.6.3/layui.js}" charset="utf-8"></script>
+<script th:src="@{/js/lay-config.js}" charset="utf-8"></script>
+<script th:inline="javascript">
+    layui.use(['jquery', 'form','layer'], function () {
+        var $ = layui.$,
+            form = layui.form
+        var accountExist = [[${accountExist}]];
+        if (accountExist === "true") {
+            alert("该账号已存在，请重新填写");
+        }else {//为false，即不存在该账号，注册成功
+        }
+        form.on('submit(formStep)', function (data) {//“注册”按钮
+            console.log(data)
+            var data = JSON.stringify(data.field);//表格数据要转为json格式进行传输
+            $.ajax({
+                url: '/registerUser',
+                type: 'post',
+                dataType: 'json',//告知服务器，希望返回json格式。如果不写则自动去判断服务器返回数据类型
+                contentType: "application/json",//告知服务器，发送的数据是json格式
+                data: data,
+                success: function (res) {
+                    //判断后端返回结果
+                    if (res.code == 0) {
+                        //返回成功则表单重置
+                        $("#form1")[0].reset();
+                        layui.form.render();
+                        return layer.msg(res.msg);
+                    } else {
+                        return layer.msg(res.msg);
+                    }
+                }
+            })
+            return false;
+
+        });
+
+        $(".login").click(function () {
+            location.href="/toLogin"
+        })
+
+        var laydate = layui.laydate;
+        var myDate = new Date();
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#birthday', //指定元素
+            format: 'yyyy年MM月dd日',
+            max: 'myDate'
+        });
+    })
+
+</script>
+</body>
+</html>

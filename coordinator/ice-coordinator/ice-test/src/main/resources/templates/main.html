@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>管理系统</title>
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <script th:src="@{/lib/layui-v2.6.3/layui.js}"></script>
+</head>
+<body>
+<div style="text-align: center;width:500px;height:500px;position: absolute;left: 50%;top:50%;margin: -250px 0 0 -250px">
+    <div style="height: 100px"><h1 style="line-height: 100px">发布任务功能区</h1></div>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="publishTask()">我发布任务</button>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="myPublishTask()">已发布任务</button>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="apply()">任务申请表</button>
+    <div style="height: 100px"><h1 style="line-height: 100px">接收任务功能区</h1></div>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="showTasks()">任务公告栏</button>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="myTasks()">已接受任务</button>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="myApply()">申请的记录</button>
+    <div style="height: 100px"><h1 style="line-height: 100px">选择协作方功能区</h1></div>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="registerService()">注册服务</button>
+    <button type="button" class="layui-btn layui-btn-lg" onclick="chooseCompany()">选择协作方</button>
+</div>
+</body>
+<script th:src="@{/lib/jquery-3.4.1/jquery-3.4.1.min.js}" charset="utf-8"></script>
+<script th:src="@{/lib/jq-module/jquery.particleground.min.js}" charset="utf-8"></script>
+<script th:src="@{/lib/jquery-3.4.1/jquery.cookie.js}" charset="utf-8"></script>
+<script th:inline="javascript">
+    function publishTask(){
+        let publisher=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = "/publishTasks/"+publisher
+    }
+
+    function myPublishTask(){
+        let publisher=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/myPublishTasks/'+publisher;
+    }
+
+    function apply(){
+        let username=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/applicationReceiver/'+username;
+    }
+
+    function showTasks(){
+        let username=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/showTasks/'+username
+    }
+
+
+    function myTasks(){
+        let username=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/myTasks/'+username
+    }
+
+    function myApply(){
+        let username=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/myApply/'+username;
+    }
+
+    function registerService(){
+        let username=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/saveCompany/'+username;
+    }
+
+    function chooseCompany(){
+        let username=[[${#httpSession.getAttribute('account')}]];
+        window.location.href = '/chooseCompany/'+username;
+    }
+
+</script>
+</html>

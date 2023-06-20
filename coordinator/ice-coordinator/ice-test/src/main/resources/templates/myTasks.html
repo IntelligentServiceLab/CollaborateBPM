@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>我接受的任务</title>
+  <!--在该页面中要展示的是自己发布的所有任务名称-->
+  <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+  <script th:src="@{/lib/layui-v2.6.3/layui.js}"></script>
+  <!--引入jquery方便表格引入图片，进行展示-->
+  <script type="text/javascript" src="http://libs.baidu.com/jquery/1.8.3/jquery.min.js"></script>
+</head>
+<body>
+<!--点击接收任务弹出窗的表单-->
+<div class="layui-row form-add-project" style="display: none">
+  <form class="layui-form" action="" id="updateTaskProcessForm">
+    <div class="layui-form-item">
+      <label class="layui-form-label">最新进程：</label>
+      <div class="layui-input-block">
+        <input type="text" name="taskProcess" required lay-verify="required" placeholder="请输入任务当前进度"
+               autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <div class="layui-input-block">
+        <button class="layui-btn" lay-submit lay-filter="formDemo">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+      </div>
+    </div>
+  </form>
+</div>
+<h1 style="text-align: center">我接受的任务</h1>
+<table id="tasksTable" lay-filter="tasksTableBar"></table>
+<!--id值是给表格渲染使用的，lay-filter是给各种事件绑定使用的-->
+<!--自定义一个工具条模板-->
+<script type="text/html" id="barDemo">
+  <!--这里的id主要是将其绑定在各行之中-->
+  <a class="layui-btn layui-btn-xs" lay-event="commentProgress">进入论坛</a>
+  <a class="layui-btn layui-btn-xs" lay-event="communicationProgress">联系发布者</a>
+  <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="updateProcess">进程更新</a>
+  <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="taskSuccess">处理完成</a>
+  <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="taskFailure">处理失败</a>
+</script>
+<!--自定义一个表格图片模板-->
+<script type="text/html" id="picImg">
+  <div>
+    <img src="{{ d.images }}" width="80px" height="45px"/>
+  </div>
+</script>
+
+<script th:inline="javascript">
+  let username=[[${username}]];
+  layui.use(['table', 'layer' ,'form'], function () {
+    let table = layui.table;
+    let $ = layui.$;
+    let form = layui.form
+    let index;//用于在提交表单之后关闭弹出层
+    let title;//当前任务ID
+    table.render({
+      elem: '#tasksTable'
+      , toolbar: true//开启表格头部工具栏打印等，工具栏不等于工具条
+      , defaultToolbar: ['filter', 'print', 'exports']//第一个是筛选，也就是选择列显示
+      , url: '/getTasksList?method=3&publisher='+username//得到自己正在处理的所有任务列表
+      , page: true //开启分页
+      , title: "可接受的任务"    //定义 table 的大标题（在文件导出等地方会用到）
+      , cols: [
+        [ //表头
+          {type: 'numbers', title: '序号', align: "center", width: "5%", fixed: 'left', sort: true}//序号列
+          , {field: 'title', title: '任务名称', align: "center", width: "10%"}
+          , {field: 'description', title: '任务具体描述', align: "center", width: "30%"}
+          , {field: 'images', title: '具体规格要求', align: "center", width: "18%", templet: '#picImg', event: 'images'}
+          , {field: 'taskProcess', title: '任务进程', align: "center", width: "10%"}
+          , {field: 'company', title: '任务发布公司', align: "center", width: "10%"}
+          , {field: 'email', title: '发布者邮箱', align: "center", width: "13%"}
+          , {field: 'publishTime', title: '发布时间', align: "center", width: "11%", sort: true}
+          , {field: 'endTime', title: '预期结束时间', align: "center", width: "10%", sort: true}
+          , {field: 'taskType', title: '任务领域', align: "center", width: "7%", sort: true}
+          , {fixed: 'right', title: '操作', align: "center", width: 400, toolbar: '#barDemo'}//每行有沟通进度和任务取消
+        ]
+      ]
+    });
+
+    //监听提交，提交完之后不要跳转页面，因此推荐ajax提交数据。提交接收者基本信息
+    form.on('submit(formDemo)', function (data) {
+      console.log(title)
+      console.log(data.field.taskProcess)
+      $.ajax({
+        //提交处理人信息，同时更新任务表状态
+        url: '/updateTaskProcess?title=' + title+'&taskProcess='+data.field.taskProcess,
+        type: 'get',
+        dataType: 'json',//告知服务器，希望返回json格式。如果不写则自动去判断服务器返回数据类型
+        success: function (res) {
+          //判断后端返回结果
+          if (res.code == 0) {
+            //关闭弹窗
+            layer.close(index);
+            return layer.msg(res.msg);
+          } else {
+            return layer.msg(res.msg);
+          }
+        }
+      })
+      layer.msg("请等待确认")
+      return false;
+    });
+
+    //table事件函数：table.on('event(filter)', callback);
+    //工具条事件
+    table.on('tool(tasksTableBar)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值",里面不需要双引号
+      let data = obj.data; //获得当前行数据
+      let layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+      let tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+      //添加成功
+      //点击进入论坛
+      if (layEvent === 'commentProgress') {
+        console.log(obj.data.taskStatus)
+        //无论何种状态（除了任务已经取消外，都允许进入论坛咨询）
+        let username = publisher;
+        window.location.href = "/comment?username=" + username + "&title=" + data.title
+      }
+      else if (layEvent === 'communicationProgress') { //交流进度
+        //获取发布者信息和自己的信息
+        let toUserName = obj.data.publisher
+        window.location.href="/chat?method=1&username="+username+"&toUserName="+toUserName////method表示以处理者身份进入聊天室
+      } else if (layEvent === 'LAYTABLE_TIPS') {
+        layer.alert('Hi，头部工具栏扩展的右侧图标。');
+      } else if(layEvent === 'taskSuccess'){
+        //任务处理成功，修改任务的状态：此时不是任务成功，而是待验收
+        layer.confirm('确定该任务已经处理完成了吗', function (index) {
+          let title = data.title
+          obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+          layer.close(index);
+          //向服务端发送删除指令
+          $.ajax({
+            url: '/updateTaskStatus?title='+title+'&taskStatus=5',
+            success: function (res) {
+              //如果上传成功
+              if (res.code == 0) {
+                return layer.alert('请耐心等待审批结果');
+              } else {
+                return layer.msg('请重试');
+              }
+            }
+          });
+        });
+      }else if(layEvent ==='updateProcess'){
+        title=data.title//当前任务的ID
+        index = layer.open({
+          type: 1,
+          title: "更新任务进程",
+          area: "550px",//只定义宽度
+          content: $(".form-add-project").html()//放置dom对象，实际是绑定关系
+        })
+      }
+      //点击图片事件
+      else if (layEvent === 'images') {//单击图片
+        let img = "<img src='" + obj.data.images + "' style='height: 300px;width: 300px'>"//展示图片
+        layer.open({
+          title: obj.data.title + '的规格要求'
+          , area: [img.width + "px", img.height + 'px']
+          , content: img
+          , btnAlign: 'c'
+        });
+      }
+      else {//任务取消：这里可以取消已经完成的任务，也可以取消其他状态的任务
+        layer.confirm('确定任务已经处理失败了吗', function (index) {
+          let title = data.title
+          obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+          layer.close(index);
+          //向服务端发送删除指令
+          $.ajax({
+            url: '/updateTaskStatus?title='+title+'&taskStatus=3',
+            success: function (res) {
+              //如果上传成功
+              if (res.code == 0) {
+                return layer.msg('任务状态已经更改');
+              } else {
+                return layer.msg('请重试');
+              }
+            }
+          });
+        });
+      }
+      obj.stoppropagation();//防止行事件和工具条冲突
+    });
+
+  })
+
+</script>
+</body>
+</html>
