@@ -1,0 +1,27 @@
+server:
+  compression:
+    enabled: true
+    mime-types: application/javascript
+spring:
+  profiles:
+    active: dev
+  resources:
+    static-locations: classpath:static/
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    initialization-mode: always
+    schema:
+      - classpath:sql/ice.sql
+    continue-on-error: false
+    platform: mysql
+    sql-script-encoding: UTF-8
+    separator: ;
+mybatis-plus:
+  mapper-locations: classpath:mybatis/*.xml
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
