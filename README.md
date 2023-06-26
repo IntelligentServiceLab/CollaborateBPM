@@ -1,17 +1,5 @@
 # 跨组织业务流程开放协作平台
 
-
-## 跨组织业务流程开放协作平台项目介绍
-
-
-
-- 功能缺陷请在项目上创建建 **issues**，可以查看已完成issues来寻找问题解决方法
-<br/>
-
-
-
-移动端测试账号密码 账号：admin 密码：1  [源码](https://github.com/IntelligentServiceLab/CollaborateBPM)
-
 ## 工作流解决方案
 **我们通过业务对象、表单、流程引擎共同协作来解决业务流难实施的痛点**
 
@@ -32,11 +20,9 @@
 
 
 
-
-
 ## 软件架构说明
 
-#### 组件化
+### 组件化
 系统通过功能划分出了多个模块，每个模块由API、CORE、REST、SERVICE(apiImpl) 几部分组成。模块与模块间通过API交互，WEB则用于整合各个模块 
 [系统模块介绍介绍](https://agile-bpm.gitee.io/website/zh-cn/docs/framework.html)
 
@@ -47,14 +33,13 @@
 AgileBPM 是一个前后端分离的项目，这样各个团队会更专注于其本职工作，后端只负责业务逻辑、API 提供。而大前端则不拘泥于一种前端技术、更自由的构建UI交互逻辑
 
 #### 项目技术组件
-
+![项目组件](https://camo.githubusercontent.com/0b77761b2985fa70665ecb27e62319123f9609ae378165d6668b7b67f3e2fa83/68747470733a2f2f696d616765732e67697465652e636f6d2f75706c6f6164732f696d616765732f323031382f303730352f3137323334395f65356465383237615f313836313734302e706e67)
 
 
 ##### 其他项目中用到的组件
 前端：bootstrap-table，codemirror，echarts，layer，markdown，softable，ueditor，ztree
-移动端：vue，vux,weui
 
-#### 架构模式
+### 架构模式
 该工具目前是标准的SOA架构，但依然拥有微服务架构的特点。
 可以通过选择WEB模块的依赖来构建您需要的服务模块，然后修改API 实现，选择一个服务注册中心，就完成了微服务的改造
 
